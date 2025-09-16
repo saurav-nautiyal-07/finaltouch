@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-image: url("ai-chatbot.png");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            transition: margin-left 0.4s ease-in-out;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #2563EB;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar h1 {
+            font-size: 20px;
+        }
+
+        /* Sidebar */
+        .slider {
+            width: 200px;
+            height: 100vh;
+            background-color: #2563EB;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translateX(-200px);
+            transition: transform 0.4s ease-in-out;
+            color: white;
+            padding: 20px 10px;
+            z-index: 999;
+            padding-top: 60px;
+        }
+
+        body.open .slider {
+            transform: translateX(0);
+        }
+
+        /* ✅ Sidebar menu */
+        .menu button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            color: #007bff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .menu button:hover {
+            background: #0056b3;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* Toggle button */
+        .slidbtn button {
+            width: 40px;
+            height: 40px;
+            background-color: rgb(15, 16, 17);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .slidbtn button:hover {
+            background-color: rgb(30, 30, 30);
+        }
+
+        .logout-btn {
+            background: #111;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #e63946;
+        }
+
+        /* Main content */
+        .content {
+            margin-top: 70px;
+            padding: 20px;
+            transition: margin-left 0.4s ease-in-out;
+        }
+
+        body.open .content {
+            margin-left: 200px;
+        }
+
+        /* Chatbot */
+        .chat-container {
+            max-width: 600px;
+            margin: auto;
+            background: rgba(67, 139, 202, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: rgba(58, 123, 213, 0.8);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background: rgba(58, 123, 213, 0.8);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message {
+            background: rgba(229, 231, 235, 0.8);
+            color: #111;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input {
+            display: flex;
+            border-top: 1px solid rgba(221, 221, 221, 0.5);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            color: #111;
+        }
+
+        .chat-input button {
+            background: #3a7bd5;
+            border: none;
+            padding: 12px 18px;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .chat-input button:hover {
+            background: #2a5fa5;
+        }
+
+        /* ✅ Responsive CSS for small screens (mobile) */
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 10px;
+            }
+
+            .navbar h1 {
+                font-size: 16px;
+            }
+            
+            .slidbtn button {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+
+            .slider {
+                width: 70%;
+                padding-top: 80px;
+            }
+            
+            body.open .content {
+                margin-left: 0;
+            }
+
+            .chat-container {
+                height: 85vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="slidbtn">
+            <button id="slider-btn" onclick="slidbar()">☰</button>
+        </div>
+        <h1>📘 Smart Study Planner</h1>
+        <a href="logout.html" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+    
+    <div class="slider" id="slider">
+        <h2>Menu</h2>
+        <div class="menu">
+            <button onclick="location.href='#'">Home</button>
+            <button onclick="location.href='#'">About</button>
+            <button onclick="location.href='#'">Contact</button>
+            <button onclick="location.href='#'">AI Chatbot</button>
+            <button onclick="location.href='#'">AI Quizzes</button>
+            <button onclick="location.href='#'">Notes Summariser</button>
+            <button onclick="location.href='#'">Reminder</button>
+            <button onclick="location.href='#'">Progress</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="chat-container">
+            <div class="chat-header">🤖 AI Chatbot</div>
+            <div class="chat-box" id="chat-box">
+                <div class="message bot-message">Hello! How can I help you today?</div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById("chat-box");
+        const userInput = document.getElementById("user-input");
+        const sliderBtn = document.getElementById("slider-btn");
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === "") return;
+
+            addMessage(message, "user");
+
+            setTimeout(() => {
+                addMessage("You said: " + message, "bot");
+            }, 800);
+
+            userInput.value = "";
+        }
+
+        function addMessage(text, sender) {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message", sender === "user" ? "user-message" : "bot-message");
+            messageElement.textContent = text;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        userInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        function slidbar() {
+            document.body.classList.toggle("open");
+            if (document.body.classList.contains("open")) {
+                sliderBtn.textContent = "✖";
+            } else {
+                sliderBtn.textContent = "☰";
+            }
+        }
+    </script>
+</body>
+</html>
