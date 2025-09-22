@@ -152,6 +152,9 @@
       background-color: #2196f3;
     }
     .task-actions button:last-child { background-color: #f44336; }
+    .logout-btn {
+      width: 100px;
+    }
   </style>
 </head>
 <body>
@@ -163,7 +166,8 @@
         <button id="slider-btn" onclick="slidbar()">☰</button>
       </div>
       <h1>📘 Smart Study Planner</h1>
-      <a href="logout.html" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      <!-- <a href="logout.html" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a> -->
+       <button class="logout-btn" onclick="location.href='/'"> Logout</button>
     </nav>
   </section>
 
@@ -171,14 +175,13 @@
   <div class="slider" id="slider">
     <h2>Menu</h2>
     <div class="menu">
-      <button onclick="location.href='#'">Home</button>
-      <button onclick="location.href='#'">About</button>
-      <button onclick="location.href='#'">Contact</button>
-      <button onclick="location.href='#'">AI Chatbot</button>
-      <button onclick="location.href='#'">AI Quizzes</button>
-      <button onclick="location.href='#'">Notes Summariser</button>
-      <button onclick="location.href='#'">Reminder</button>
-      <button onclick="location.href='#'">Progress</button>
+      <button onclick="location.href='/'">Home</button><br>
+      <button onclick="location.href='/dashboard/dashboard'">Dashboard</button><br>
+      <button onclick="location.href='/chatbot/chatbot'">AI Chatbot</button><br>
+      <button onclick="location.href='/quiz/quiz'">AI Quizzes</button><br>
+      <button onclick="location.href='/notes/notes'">Notes Summariser</button><br>
+      <button onclick="location.href='/reminders/reminders'">Reminder</button><br>
+      <button onclick="location.href='progress/progress'">Progress</button><br>
     </div>
   </div>
 
