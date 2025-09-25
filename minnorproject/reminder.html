@@ -322,135 +322,112 @@
 </script> -->
 
 
-
 <script>
-  // Sidebar toggle
-  function slidbar() {
-    document.body.classList.toggle("open");
-    const sliderBtn = document.getElementById("slider-btn");
-    sliderBtn.style.display = document.body.classList.contains("open") ? "none" : "inline-block";
+let tasks = [];
+
+// Fetch tasks from Flask API
+async function fetchTasks() {
+  // get all reminders from backend
+  const res = await fetch("http://127.0.0.1:5000/api/reminders");
+  let allTasks = await res.json();
+
+  const now = Date.now();
+
+  // auto delete expired from DB
+  for (let task of allTasks) {
+    if (new Date(task.deadline).getTime() <= now) {
+      await deleteTask(task._id);
+    }
   }
 
-  document.addEventListener("DOMContentLoaded", function() {
-    const menuHeading = document.querySelector(".slider h2");
-    menuHeading.addEventListener("click", function() {
-      document.body.classList.remove("open");
-      document.getElementById("slider-btn").style.display = "inline-block";
-    });
+  // fetch again to get only valid tasks
+  const refreshed = await fetch("http://127.0.0.1:5000/api/reminders");
+  tasks = await refreshed.json();
+
+  renderTasks();
+}
+
+// Add new task
+async function addTask() {
+  const title = document.getElementById("task-title").value;
+  const desc = document.getElementById("task-desc").value;
+  const deadline = document.getElementById("task-deadline").value;
+
+  if (!title || !deadline) {
+    alert("⚠ Please enter title and deadline");
+    return;
+  }
+
+  const newTask = { title, desc, deadline, completed: false };
+
+  const res = await fetch("http://127.0.0.1:5000/api/reminders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newTask)
   });
 
-  // Task manager
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  await res.json();
+  fetchTasks(); // refresh UI after adding
+}
 
-  function saveTasks() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }
+// Mark complete
+async function completeTask(id) {
+  const task = tasks.find(t => t._id === id);
+  task.completed = !task.completed;
 
-  function addTask() {
-    const title = document.getElementById("task-title").value;
-    const desc = document.getElementById("task-desc").value;
-    const deadline = document.getElementById("task-deadline").value;
-
-    if (!title || !deadline) {
-      alert("⚠ Please enter title and deadline");
-      return;
-    }
-
-    const newTask = {
-      id: Date.now(),
-      title,
-      desc,
-      deadline,
-      completed: false
-    };
-
-    tasks.push(newTask);
-    saveTasks();
-    renderTasks();
-
-    document.getElementById("task-title").value = "";
-    document.getElementById("task-desc").value = "";
-    document.getElementById("task-deadline").value = "";
-
-    alert("✅ Task Added Successfully!");
-  }
-
-  function completeTask(id) {
-    tasks = tasks.map(task =>
-      task.id === id ? { ...task, completed: !task.completed } : task
-    );
-    saveTasks();
-    renderTasks();
-  }
-
-  function deleteTask(id) {
-    tasks = tasks.filter(task => task.id !== id);
-    saveTasks();
-    renderTasks();
-  }
-
-  // Render tasks with expired handling
-  function renderTasks() {
-    const now = Date.now();
-    const expiredMessages = [];
-
-    tasks = tasks.filter(task => {
-      const deadlineTime = new Date(task.deadline).getTime();
-      if (deadlineTime <= now) {
-        if (!task.completed) {
-          expiredMessages.push(`⏳ You did not complete: "${task.title}" before deadline.`);
-        }
-        return false; // remove expired task
-      }
-      return true;
-    });
-
-    saveTasks();
-
-    const taskList = document.getElementById("task-list");
-    taskList.innerHTML = "";
-
-    // show expired messages first
-    expiredMessages.forEach(msg => {
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "expired-message";
-      msgDiv.textContent = msg;
-      taskList.appendChild(msgDiv);
-    });
-
-    if (tasks.length === 0 && expiredMessages.length === 0) {
-      taskList.innerHTML = "<p>No tasks yet</p>";
-      return;
-    }
-
-    // show tasks
-    tasks.forEach(task => {
-      const taskItem = document.createElement("div");
-      taskItem.className = "task-item";
-      if (task.completed) taskItem.classList.add("completed");
-
-      const d = new Date(task.deadline);
-      const formattedDeadline = isNaN(d.getTime()) ? task.deadline : d.toLocaleString();
-
-      taskItem.innerHTML = `
-        <h3>${task.title}</h3>
-        <p>${task.desc || ""}</p>
-        <p class="task-timer">Deadline: ${formattedDeadline}</p>
-        <div class="task-actions">
-          <button onclick="completeTask(${task.id})">✔ Complete</button>
-          <button onclick="deleteTask(${task.id})">✖ Delete</button>
-        </div>
-      `;
-      taskList.appendChild(taskItem);
-    });
-  }
-
-  // run once on load and then every minute
-  document.addEventListener("DOMContentLoaded", function() {
-    renderTasks();
-    setInterval(renderTasks, 60000); // every 60 seconds
+  await fetch(`http://127.0.0.1:5000/api/reminders/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(task)
   });
+
+  fetchTasks();
+}
+
+// Delete task
+async function deleteTask(id) {
+  await fetch(`http://127.0.0.1:5000/api/reminders/${id}`, {
+    method: "DELETE"
+  });
+}
+
+// Render tasks
+function renderTasks() {
+  const taskList = document.getElementById("task-list");
+  taskList.innerHTML = "";
+
+  if (!tasks || tasks.length === 0) {
+    taskList.innerHTML = "<p>No tasks yet</p>";
+    return;
+  }
+
+  tasks.forEach(task => {
+    const d = new Date(task.deadline);
+    const formattedDeadline = isNaN(d.getTime()) ? task.deadline : d.toLocaleString();
+
+    const taskItem = document.createElement("div");
+    taskItem.className = "task-item";
+    if (task.completed) taskItem.classList.add("completed");
+
+    taskItem.innerHTML = `
+      <h3>${task.title}</h3>
+      <p>${task.desc || ""}</p>
+      <p class="task-timer">Deadline: ${formattedDeadline}</p>
+      <div class="task-actions">
+        <button onclick="completeTask('${task._id}')">✔ Complete</button>
+        <button onclick="deleteTask('${task._id}')">✖ Delete</button>
+      </div>
+    `;
+    taskList.appendChild(taskItem);
+  });
+}
+
+// Load tasks when page opens
+document.addEventListener("DOMContentLoaded", fetchTasks);
 </script>
+
+
+
 
 </body>
 </html>

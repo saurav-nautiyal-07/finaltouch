@@ -8,27 +8,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins", sans-serif; }
-    body { background:#f4f9ff; color:#333; transition:background 0.3s, color 0.3s; }
+    body { background:#f4f9ff; color:#333; transition: 0.3s, color 0.3s; }
 
-    /* ================= PRELOADER ================= */
+    /* PRELOADER */
     #preloader {
-      position: fixed;
-      top: 0; left: 0;
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       background: #3498db;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      color: white; font-size: 28px; font-weight: bold;
       z-index: 3000;
       transition: opacity 0.8s ease, visibility 0.8s ease;
     }
     #preloader i {
-      font-size: 60px;
-      margin-bottom: 20px;
+      font-size: 60px; margin-bottom: 20px;
       animation: bounce 1.5s infinite;
     }
     @keyframes bounce {
@@ -36,7 +30,6 @@
       50% { transform: translateY(-15px); }
     }
 
-    
     header { background:#3498db; color:white; display:flex; justify-content:space-between; align-items:center; padding:15px 8%; position:sticky; top:0; z-index:1000; box-shadow:0 4px 6px rgba(0,0,0,0.1); }
     header .logo { font-size:22px; font-weight:700; }
     nav ul { list-style:none; display:flex; gap:20px; }
@@ -45,7 +38,7 @@
     .auth-buttons button { padding:8px 18px; margin-left:10px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
     .signin { background:white; color:#3498db; }
     .signin:hover { background:#ecf0f1; }
-    .login { background:#e74c3c; color:white; }
+    .login { background:#e74c3c; color:white; border-radius: 2px;}
     .login:hover { background:#c0392b; }
 
     .hero { display:flex; align-items:center; justify-content:space-between; padding:80px 8%; background:#dfefff; }
@@ -91,11 +84,19 @@
     .modal-content { background:white; padding:30px; border-radius:10px; width:300px; text-align:center; position:relative; }
     .modal input { width:90%; margin:10px 0; padding:8px; border:1px solid #ccc; border-radius:5px; }
     .close { position:absolute; right:15px; top:10px; font-size:22px; cursor:pointer; }
+    /* Rounded buttons for login & signup inside popup */
+.modal-content button {
+  border-radius: 25px;   /* makes button pill-shaped */
+  padding: 10px 20px;    /* extra padding for nice look */
+  font-size: 16px;       /* adjust text size */
+  cursor: pointer;
+}
+
   </style>
 </head>
 <body>
 
-  <!-- ================= PRELOADER ================= -->
+  <!-- PRELOADER -->
   <div id="preloader">
     <i class="fas fa-graduation-cap"></i>
     <p>MyStudyLife</p>
@@ -112,9 +113,37 @@
       </ul>
     </nav>
     <div class="auth-buttons">
-      <button onclick="signin()" class="signin">Sign In</button>
-      <button onclick="login()" class="login">Log In</button>
-    </div>
+  <button onclick="openModal('signupModal')" class="signin">Sign In</button>
+  <button onclick="openModal('loginModal')" class="login">Log In</button>
+</div>
+ <!-- SIGNUP POPUP -->
+<div id="signupModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('signupModal')">&times;</span>
+    <h2>Sign Up</h2>
+    <form method="POST" action="/auth/signup">
+      <input type="email" name="email" placeholder="Enter Email" required>
+      <input type="password" name="password" placeholder="Enter Password" required>
+      <button type="submit" class="signin">Sign Up</button>
+    </form>
+  </div>
+</div>
+
+<!-- LOGIN POPUP -->
+<div id="loginModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('loginModal')">&times;</span>
+    <h2>Log In</h2>
+    <form method="POST" action="/auth/login">
+      <input type="email" name="email" placeholder="Enter Email" required>
+      <input type="password" name="password" placeholder="Enter Password" required>
+      <button type="submit" class="login">Log In</button>
+    </form>
+  </div>
+</div>
+
+
+    
   </header>
 
   <!-- HERO SECTION -->
@@ -124,10 +153,8 @@
       <p>An AI-powered chatbot designed to help students with career guidance, study support, and answering academic queries instantly.</p>
       <a href="#" class="btn-primary">Get Started Free</a>
     </div>
-    <img src=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQQlrQhbxA9E74GohpknKA1Wv_UV1Bt-rCX7bmwDsqoCw_-jUHD-tR2b7h4Fkxw8ol9h4&usqp=CAU height="500px"
-    width="500px" alt="Success Steps">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQQlrQhbxA9E74GohpknKA1Wv_UV1Bt-rCX7bmwDsqoCw_-jUHD-tR2b7h4Fkxw8ol9h4&usqp=CAU" height="500px" width="500px" alt="Success Steps">
   </section>
-
 
   <!-- FEATURES -->
   <section id="features">
@@ -186,40 +213,16 @@
     </div>
   </footer>
 
-  <!-- MODAL                                                           -->
-  <div id="authModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2 id="modal-title">Welcome</h2>
-      <input type="text" placeholder="Email id" />
-      <input type="password" placeholder="Password" />
-      <button class="btn-primary">Submit</button>
-    </div>
-  </div>
-
 <script>
-
   function initFeatures(){
-    // Smooth Scroll
     document.querySelectorAll('nav a').forEach(anchor => {
       anchor.addEventListener('click', function(e) {
         e.preventDefault();
         const section = document.querySelector(this.getAttribute('href'));
-        if (section) {
-          section.scrollIntoView({ behavior: 'smooth' });
-        }
+        if (section) { section.scrollIntoView({ behavior: 'smooth' }); }
       });
     });
 
-    // Modal
-    const modal = document.getElementById("authModal");
-    const modalTitle = document.getElementById("modal-title");
-    window.signin = function(){ modal.style.display="flex"; modalTitle.innerText = "Sign In"; }
-    window.login = function(){ modal.style.display="flex"; modalTitle.innerText = "Log In"; }
-    document.querySelector(".close").onclick = () => modal.style.display="none";
-    window.onclick = (e) => { if(e.target==modal) modal.style.display="none"; }
-
-    // Scroll Animation
     const boxes = document.querySelectorAll(".box");
     window.addEventListener("scroll", () => {
       boxes.forEach(box => {
@@ -228,7 +231,6 @@
       });
     });
 
-    // Typing Effect
     const text = "smart study assistant";
     let i = 0;
     function typeEffect() {
@@ -241,236 +243,27 @@
     typeEffect();
   }
 
-  // Preloader
   window.onload = () => {
     setTimeout(() => {
       document.getElementById("preloader").style.opacity = "0";
       document.getElementById("preloader").style.visibility = "hidden";
-      initFeatures(); // अब features यहां से run होंगे
+      initFeatures();
     }, 2000);
   };
-
-
-
-
-
-
-// // ✅ Handle Signup
-// async function signup(event) {
-//   event.preventDefault();
-//   const email = document.getElementById("signup-email").value;
-//   const password = document.getElementById("signup-password").value;
-
-//   try {
-//     const response = await fetch("http://localhost:5000/signup", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ email, password })
-//     });
-
-//     const data = await response.json();
-//     if (response.ok) {
-//       alert("Signup successful! Please log in.");
-//       window.location.href = "login.html";
-//     } else {
-//       alert(data.message || "Signup failed.");
-//     }
-//   } catch (error) {
-//     console.error("Error:", error);
-//     alert("Server error during signup.");
-//   }
-// }
-
-// // ✅ Handle Login
-// async function login(event) {
-//   event.preventDefault();
-//   const email = document.getElementById("login-email").value;
-//   const password = document.getElementById("login-password").value;
-
-//   try {
-//     const response = await fetch("http://localhost:5000/login", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ email, password })
-//     });
-
-//     const data = await response.json();
-//     if (response.ok) {
-//       // Save token/session info to localStorage
-//       localStorage.setItem("token", data.token);
-//       localStorage.setItem("isLoggedIn", "true");
-
-//       alert("Login successful!");
-//       window.location.href = "dashboard.html";
-//     } else {
-//       alert(data.message || "Invalid credentials.");
-//     }
-//   } catch (error) {
-//     console.error("Error:", error);
-//     alert("Server error during login.");
-//   }
-// }
-
-// // ✅ Handle Get Started button
-// document.addEventListener("DOMContentLoaded", () => {
-//   const getStartedBtn = document.querySelector(".btn-primary");
-//   if (getStartedBtn) {
-//     getStartedBtn.addEventListener("click", function(e) {
-//       e.preventDefault();
-//       const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-//       if (isLoggedIn) {
-//         window.location.href = "dashboard.html";
-//       } else {
-//         window.location.href = "signup.html";
-//       }
-//     });
-//   }
-// });
-
-
-// ✅ Sign In (New User Registration)
-// async function signin() {
-//   const email = prompt("Enter your email:");
-//   const password = prompt("Enter your password:");
-
-//   if (!email || !password) {
-//     alert("Email and password are required!");
-//     return;
-//   }
-
-//   try {
-//     const response = await fetch("http://localhost:5000/signup", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ email, password })
-//     });
-
-//     const data = await response.json();
-//     if (response.ok) {
-//       alert("Signup successful! Please log in now.");
-//     } else {
-//       alert(data.message || "Signup failed.");
-//     }
-//   } catch (error) {
-//     console.error("Error:", error);
-//     alert("Server error during signup.");
-//   }
-// }
-
-
-
-
-async function signin() {
-  const email = prompt("Enter your email:");
-  const password = prompt("Enter your password:");
-
-  if (!email || !password) {
-    alert("Email and password are required!");
-    return;
+    function openModal(id) {
+    document.getElementById(id).style.display = 'flex';
+  }
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
   }
 
-  try {
-    const response = await fetch("http://localhost:5000/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      alert("✅ Signup successful! Please log in now.");
-    } else if (data.message && data.message.includes("already")) {
-      alert("⚠ User already registered. Please log in instead.");
-    } else {
-      alert(data.message || "Signup failed.");
+  // Close modal when clicking outside
+  window.onclick = function(e) {
+    if (e.target.classList.contains('modal')) {
+      e.target.style.display = 'none';
     }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Server error during signup.");
   }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ✅ Log In (Existing User Authentication)
-async function login() {
-  const email = prompt("Enter your email:");
-  const password = prompt("Enter your password:");
-
-  if (!email || !password) {
-    alert("Email and password are required!");
-    return;
-  }
-
-  try {
-    const response = await fetch("http://localhost:5000/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      // Save login state
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("isLoggedIn", "true");
-
-      alert("Login successful!");
-      window.location.href = "dashboard.html"; // redirect after login
-    } else {
-      alert(data.message || "Invalid credentials.");
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Server error during login.");
-  }
-}
-
-// ✅ Handle "Get Started" button
-document.addEventListener("DOMContentLoaded", () => {
-  const getStartedBtn = document.querySelector(".btn-primary");
-  if (getStartedBtn) {
-    getStartedBtn.addEventListener("click", function(e) {
-      e.preventDefault();
-      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-      if (isLoggedIn) {
-        window.location.href = "dashboard.html";
-      } else {
-        // Instead of signup.html → call signin()
-        signin();
-      }
-    });
-  }
-});
 </script>
-
-
 
 </body>
 </html>
