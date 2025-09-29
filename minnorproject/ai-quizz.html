@@ -215,14 +215,14 @@
   <div class="slider" id="slider">
 <h2>Menu</h2>
 <div class="menu">
-  <button onclick="location.href='#'">Home</button><br>
-  <button onclick="location.href='#'">About</button><br>
-  <button onclick="location.href='#'">Contact</button><br>
-  <button onclick="location.href='#'">AI Chatbot</button><br>
-  <button onclick="location.href='#'">AI Quizzes</button><br>
+  <button onclick="location.href='/home'">Home</button><br>
+  <button onclick="location.href='/dashboard/dashboard'">Dashboard</button><br>
+  <button onclick="location.href='/planner/planner'">Planner</button><br>
+  <button onclick="location.href='/chatbot/chatbot'">AI Chatbot</button><br>
+  <button onclick="location.href='/ai-quiz/'">AI Quizzes</button><br>
   <button onclick="location.href='#'">Notes Summariser</button><br>
-  <button onclick="location.href='#'">Reminder</button><br>
-  <button onclick="location.href='#'">Progress</button><br>
+  <button onclick="location.href='/reminders/reminders'">Reminder</button><br>
+  <button onclick="location.href='/progress/progress'">Progress</button><br>
 </div>
 </div>
 
@@ -517,6 +517,27 @@
 
   // Init
   loadQuestions();
+  // --- Load Questions (from backend) ---
+async function loadQuestions() {
+  try {
+    const res = await fetch("http://localhost:5000/api/get-quiz");
+    const data = await res.json();
+    questions = data.questions || [];
+
+    if (!questions.length) {
+      quizEl.innerHTML = "<div>No quiz available. Please create one.</div>";
+      return;
+    }
+
+    totalQEl.textContent = questions.length;
+    renderQuestion();
+    startTimer();
+  } catch (e) {
+    console.error("Failed to load quiz:", e);
+    quizEl.innerHTML = "<div style='color:red'>Error loading quiz.</div>";
+  }
+}
+
 </script>
 
 </body>
