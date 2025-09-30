@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Video to Notes Converter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#ffffff;
+      --primary:#4f46e5;   /* violet */
+      --accent:#2563eb;    /* blue */
+      --muted:#f3f4f6;     /* light gray */
+      --text:#111827;      /* near-black */
+      --sub:#6b7280;       /* gray */
+      --ring:#c7d2fe;
+      --shadow: 0 6px 18px rgba(0,0,0,0.08);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+      background:linear-gradient(180deg,#ffffff 0%, #eef2ff 100%);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:900px;
+      margin:32px auto;
+      padding:16px;
+    }
+    .card{
+      background:var(--bg);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:24px;
+      border:1px solid #e5e7eb;
+    }
+    .title{
+      margin:0 0 12px 0;
+      font-size:24px;
+      font-weight:700;
+      color:var(--primary);
+    }
+    .sub{
+      margin:0 0 24px 0;
+      color:var(--sub);
+      font-size:14px;
+    }
+
+    /* Toggle switch */
+    .toggle-row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .switch{
+      position:relative;
+      display:inline-block;
+      width:64px;
+      height:34px;
+    }
+    .switch input{display:none;}
+    .slider{
+      position:absolute;
+      cursor:pointer;
+      top:0; left:0; right:0; bottom:0;
+      background:#e5e7eb;
+      transition:.3s;
+      border-radius:999px;
+      border:1px solid #d1d5db;
+    }
+    .slider:before{
+      position:absolute;
+      content:"";
+      height:28px; width:28px;
+      left:3px; top:2.5px;
+      background:white;
+      transition:.3s;
+      border-radius:999px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.15);
+    }
+    input:checked + .slider{
+      background:linear-gradient(90deg, var(--accent), var(--primary));
+      border-color:transparent;
+      box-shadow:0 0 0 4px var(--ring);
+    }
+    input:checked + .slider:before{
+      transform:translateX(29px);
+    }
+    .mode-label{
+      font-size:14px;
+      color:var(--text);
+      background:#eef2ff;
+      padding:6px 10px;
+      border-radius:8px;
+    }
+
+    /* Panels */
+    .panel{
+      display:none;
+      background:var(--muted);
+      border:1px dashed #d1d5db;
+      border-radius:12px;
+      padding:16px;
+      margin-bottom:16px;
+    }
+    .panel.active{display:block;}
+
+    /* Inputs */
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    label{
+      font-weight:600;
+      font-size:14px;
+      color:#374151;
+    }
+    input[type="file"],
+    input[type="text"],
+    textarea{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      outline:none;
+      background:white;
+      font-size:14px;
+    }
+    input[type="text"]:focus,
+    textarea:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 4px var(--ring);
+    }
+
+    .row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      background:linear-gradient(90deg, var(--accent), var(--primary));
+      color:white;
+      font-weight:600;
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      box-shadow:0 4px 12px rgba(79,70,229,0.25);
+    }
+    .btn:disabled{
+      opacity:.6; cursor:not-allowed;
+    }
+    .hint{
+      font-size:12px;
+      color:#6b7280;
+    }
+
+    /* Summary */
+    .summary{
+      min-height:140px;
+      resize:vertical;
+    }
+
+    /* Responsive */
+    @media (max-width:520px){
+      .title{font-size:20px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1 class="title">Video to Notes Converter</h1>
+      <p class="sub">Choose a source, process the video, and capture the summary in the notes area below.</p>
+
+      <div class="toggle-row">
+        <span class="mode-label" id="modeText">Local Video</span>
+        <label class="switch" aria-label="Switch input mode">
+          <input id="modeSwitch" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+        <span class="mode-label">YouTube Link</span>
+      </div>
+
+      <!-- Local Video Panel -->
+      <div id="localPanel" class="panel active" aria-live="polite">
+        <div class="field">
+          <label for="localVideo">Select a video file</label>
+          <input id="localVideo" type="file" accept="video/*" />
+          <span class="hint">Tip: The accept filter helps pick video files, but still validate on the backend.</span>
+        </div>
+        <div class="row">
+          <button class="btn" id="processLocalBtn" disabled>Process Local Video</button>
+          <span class="hint">Select a file to enable processing.</span>
+        </div>
+      </div>
+
+      <!-- YouTube Link Panel -->
+      <div id="ytPanel" class="panel" aria-live="polite">
+        <div class="field">
+          <label for="ytUrl">Paste YouTube link</label>
+          <input id="ytUrl" type="text" placeholder="https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID" />
+          <span id="ytError" class="hint" style="color:#b91c1c; display:none;">Invalid YouTube URL. Please check the link.</span>
+        </div>
+        <div class="row">
+          <button class="btn" id="processYtBtn" disabled>Process YouTube Video</button>
+          <span class="hint">Enter a valid YouTube URL to enable processing.</span>
+        </div>
+      </div>
+
+      <!-- Summary Area -->
+      <div class="field">
+        <label for="summary">Summary / Notes</label>
+        <textarea id="summary" class="summary" placeholder="The generated summary will appear here. Edit or add notes as needed."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mode switch: Local <-> YouTube
+    const modeSwitch = document.getElementById('modeSwitch');
+    const modeText = document.getElementById('modeText');
+    const localPanel = document.getElementById('localPanel');
+    const ytPanel = document.getElementById('ytPanel');
+
+    function setMode(isYouTube){
+      if(isYouTube){
+        modeText.textContent = 'YouTube Link';
+        localPanel.classList.remove('active');
+        ytPanel.classList.add('active');
+      }else{
+        modeText.textContent = 'Local Video';
+        ytPanel.classList.remove('active');
+        localPanel.classList.add('active');
+      }
+    }
+    modeSwitch.addEventListener('change', (e)=> setMode(e.target.checked));
+    setMode(false); // default Local
+
+    // Local video enable button
+    const localInput = document.getElementById('localVideo');
+    const processLocalBtn = document.getElementById('processLocalBtn');
+    localInput.addEventListener('change', ()=>{
+      processLocalBtn.disabled = !localInput.files || localInput.files.length === 0;
+    });
+
+    // Basic YouTube URL validation (covers watch, youtu.be, embed, shorts)
+    // This is a commonly used community pattern; refine as needed.
+    const ytUrl = document.getElementById('ytUrl');
+    const ytError = document.getElementById('ytError');
+    const processYtBtn = document.getElementById('processYtBtn');
+
+    const ytRegex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu\.be))(\/(?:[\w-]+?\?v=|embed\/|v\/|shorts\/)?)([\w-]{6,})(\S+)?$/i;
+
+    function validateYouTube(u){
+      return ytRegex.test(u.trim());
+    }
+
+    ytUrl.addEventListener('input', ()=>{
+      const value = ytUrl.value;
+      const ok = validateYouTube(value);
+      ytError.style.display = value && !ok ? 'inline' : 'none';
+      processYtBtn.disabled = !ok;
+    });
+
+    // Placeholder handlers for processing actions
+    const summary = document.getElementById('summary');
+
+    processLocalBtn.addEventListener('click', ()=>{
+      const f = localInput.files && localInput.files[0];
+      if(!f) return;
+      summary.value = `Processing local file: ${f.name}\n\n[Demo] Hook model/API here to transcribe and summarize.`;
+      // TODO: integrate transcription + summarization pipeline
+    });
+
+    processYtBtn.addEventListener('click', ()=>{
+      const link = ytUrl.value.trim();
+      if(!validateYouTube(link)) return;
+      summary.value = `Processing YouTube link: ${link}\n\n[Demo] Fetch captions/transcript or run ASR, then summarize.`;
+      // TODO: integrate transcript fetch + summarization
+    });
+  </script>
+</body>
+</html>
